@@ -1,0 +1,81 @@
+function main() {
+  var currentMonth = monthIndex[todayMonth];
+  var daysInCurrentMonth = daysInMonths[currentMonth];
+  initialiseTemplate(daysInCurrentMonth);
+  checkExistingSheets();
+  setUpSheets(daysInCurrentMonth);
+  //hide sheets
+  for (i = 0; i < hideSheets.length; i++) {
+    ss.getSheetByName(hideSheets[i]).hideSheet();
+  }
+}
+
+  
+function initialiseTemplate(daysInCurrentMonth) {
+  templateSheet.showSheet();
+  numberOfDaysInFebruary();
+  templateSheet.getRange(29, 2, 35, 2).clear({contentsOnly: true});
+  templateSheet.getRange(25, 3, 1, 1).setValue(daysInCurrentMonth);
+  templateSheet.getRange(29, 2, daysInCurrentMonth, 2).setValues(daysOfTheWeekThisMonth(daysInCurrentMonth));
+}
+
+
+function checkExistingSheets() {
+  var existingSheets = ss.getSheets();
+  var existingSheetNames = [];
+  for (i = 0; i < existingSheets.length; i++) {
+    existingSheetNames.push(existingSheets[i].getName());  
+  }
+
+  //delete output sheets that already exist.
+  for (i = 0; i < existingSheetNames.length; i++) {
+    if (existingSheetNames[i] !== "Config" && 
+        existingSheetNames[i] !== "Tracker Template Sheet" &&
+        existingSheetNames[i] !== "Budgets Input" &&
+        existingSheetNames[i] !== "Funnel Data Dump" &&
+        existingSheetNames[i] !== "Daily Budget Weightings"
+       ) {
+      var sheet = ss.getSheetByName(existingSheetNames[i]);
+      ss.deleteSheet(sheet);
+    }
+  }
+
+}
+
+
+function setUpSheets(daysInCurrentMonth) {
+  var numberOfSheetsInput = config.getLastRow()-2;
+  var sheetNameInputsArray = config.getRange(3, 2, numberOfSheetsInput, 3).getValues();
+  Logger.log(sheetNameInputsArray);
+  var sheetNameAccountsArray = [];
+  var numberOfSheetNames = 0;
+  for (var i = 0; i < sheetNameInputsArray.length; i++) {
+    if (sheetNameInputsArray[i][0] !== ""){
+      sheetNameInputsArray[i][2] = sheetNameInputsArray[i][2].split(',');
+      sheetNameAccountsArray.push(sheetNameInputsArray[i]);
+      numberOfSheetNames += 1;
+    } 
+  }
+  Logger.log(sheetNameAccountsArray);
+  
+  var sheetNameInputs = [];
+  
+  for (i = 0; i < numberOfSheetNames; i++) {
+    if(sheetNameInputsArray[i][0] !== "") {
+      sheetNameInputs.push(sheetNameInputsArray[i][0]);
+    }
+  }
+  Logger.log(sheetNameInputs);
+  
+  for (i = 0; i < sheetNameInputs.length; i++) {
+    var newSheet = templateSheet.copyTo(ss);
+    newSheet.setName(sheetNameAccountsArray[i][1] + " - " + sheetNameAccountsArray[i][0] + " - " + sheetNameAccountsArray[i][2]);
+    newSheet.getRange(29 + daysInCurrentMonth, 2, 10, 4).clear();
+    newSheet.getRange(1, 1, 1, 1).setValue(sheetNameAccountsArray[i][0]);
+    newSheet.getRange(2, 1, 1, 1).setValue(sheetNameAccountsArray[i][1]);
+    newSheet.getRange(3, 1, 1, 1).setValue(sheetNameAccountsArray[i][2][0]);
+    if (sheetNameAccountsArray[i][2][1] === "Bing"){
+      newSheet.getRange(3, 2, 1, 1).setValue(sheetNameAccountsArray[i][2][1]);
+    }
+  }
+}

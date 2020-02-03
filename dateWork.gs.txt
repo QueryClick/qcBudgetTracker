@@ -1,0 +1,28 @@
+function numberOfDaysInFebruary() {
+    if (typeof todayYear !== "number") {
+      Logger.log("not a number");
+      throw new Error ("Invalid year value.")
+    } else if (todayYear % 4 === 0) {
+      daysInMonths["February"] = 29;
+    } else {
+      daysInMonths["February"] = 28;
+    }
+}
+
+function daysOfTheWeekThisMonth(daysInCurrentMonth) {
+  var firstOfCurrentMonth = new Date(todayYear, todayMonth);
+  var dayOfFirstOfCurrentMonth = firstOfCurrentMonth.getDay();
+  
+  
+  var daysThisMonth = [];
+  var pointer = dayOfFirstOfCurrentMonth;
+  for (i = 0; i < daysInCurrentMonth; i++) {
+    var date = new Date(todayYear, todayMonth, i + 1);
+    daysThisMonth.push([daysOfWeek[pointer], date]);
+    pointer += 1;
+    if (pointer > 6) {
+      pointer -= 7;
+    }
+  }
+  return daysThisMonth;
+}
